@@ -95,6 +95,12 @@ tbody td{padding:10px 12px;white-space:nowrap}
 .health-u{background:var(--amber-light);color:#7A5C00}
 .health-r{background:var(--red-light);color:var(--red)}
 .score-cell{font-weight:700;text-align:center}
+.notes-btn{background:var(--navy-faint);border:1px solid var(--gray-200);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:13px;line-height:1;transition:all 0.15s}
+.notes-btn:hover{background:var(--amber);border-color:var(--amber)}
+.note-row td{background:var(--navy-faint);padding:0 12px 12px}
+.note-box{background:var(--white);border:1px solid var(--gray-200);border-left:3px solid var(--amber);border-radius:var(--radius);padding:12px 16px;margin-top:2px}
+.note-label{display:block;font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:5px}
+.note-text{font-size:13px;color:var(--gray-800);line-height:1.6;white-space:pre-wrap}
 
 /* INTERPRETATION PANEL */
 .interp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -309,6 +315,7 @@ tbody td{padding:10px 12px;white-space:nowrap}
           <th style="text-align:center">Days Contain</th>
           <th>Gap Category</th>
           <th>Recurrence</th>
+          <th style="text-align:center">Notes</th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -633,6 +640,11 @@ function sortTable(key) {
 function scoreColor(v) {
   return v<=1?'color:#C0392B':v<=2?'color:#7A5C00':'color:#2E7D32';
 }
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toggleNote(id){
+  const row = document.getElementById('note-'+id);
+  if (row) row.style.display = (row.style.display==='none' || !row.style.display) ? 'table-row' : 'none';
+}
 function renderTable() {
   const data = getFiltered();
   const keyMap = {id:'id',type:'type',sev:'sev',health:'health'};
@@ -655,7 +667,9 @@ function renderTable() {
       <td style="text-align:center;color:${d.dCont>2?'#C0392B':'#2E7D32'};font-weight:600">${d.dCont}d</td>
       <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--gray-600)">${d.gap}</td>
       <td style="text-align:center;color:${d.recur==='Yes'?'#C0392B':'#2E7D32'};font-weight:700">${d.recur}</td>
-    </tr>`).join('');
+      <td style="text-align:center">${d.notes && d.notes.trim() ? `<button class="notes-btn" onclick="toggleNote('${d.id}')" title="View reviewer notes">💬</button>` : `<span style="color:var(--gray-200)">—</span>`}</td>
+    </tr>
+    ${d.notes && d.notes.trim() ? `<tr class="note-row" id="note-${d.id}" style="display:none"><td colspan="18"><div class="note-box"><span class="note-label">Reviewer Notes — ${d.id}</span><span class="note-text">${escapeHtml(d.notes)}</span></div></td></tr>` : ''}`).join('');
   document.getElementById('table-subtitle').textContent = `${data.length} case${data.length!==1?'s':''} shown · click column header to sort`;
 }
 
@@ -692,7 +706,7 @@ function parseCSV(text) {
       dCont:+r['Days to Containment']||0, dRC:+r['Days to RC']||0,
       dPCA:+r['Days to PCA']||0, dClose:+r['Days to Closure']||0,
       gap:r['Primary Gap Category']||'', recur:r['Recurrence (30/60/90)']||'No',
-      evid:r['Evidence Strength']||''
+      evid:r['Evidence Strength']||'', notes:r['Reviewer Notes']||''
     };
   });
 }
