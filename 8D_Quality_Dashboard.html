@@ -24,20 +24,25 @@
 body{font-family:var(--font);background:var(--gray-50);color:var(--gray-800);font-size:14px;line-height:1.5}
 
 /* TOP BAR */
-.topbar{background:var(--navy);color:white;height:72px;padding:0 2rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2rem;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md)}
-.topbar-brand{display:flex;align-items:center;gap:14px}
+.topbar{background:var(--navy);color:white;min-height:72px;padding:10px 1.5rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md)}
+.topbar-brand{display:flex;align-items:center;gap:14px;flex:0 0 auto}
 .topbar-brand img{height:54px;width:auto}
 .topbar-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;white-space:nowrap}
 .topbar-subtitle{font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:0.04em;text-transform:uppercase;margin-top:2px}
-.topbar-filters{display:flex;align-items:center;gap:10px}
+.topbar-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1 1 auto;justify-content:center}
 .filter-label{font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:0.05em;text-transform:uppercase;margin-right:4px}
 .filter-btn{padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.8);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s}
 .filter-btn:hover,.filter-btn.active{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700}
-.topbar-right{display:flex;align-items:center;gap:12px;justify-self:end}
+.topbar-right{display:flex;align-items:center;gap:12px;flex:0 0 auto}
 .load-btn{padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:var(--radius);color:white;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px}
 .load-btn:hover{background:rgba(255,255,255,0.2)}
 .last-updated{font-size:11px;color:rgba(255,255,255,0.45)}
 
+@media (max-width:900px){
+  .topbar{flex-direction:column;align-items:stretch;text-align:center}
+  .topbar-filters{justify-content:center}
+  .topbar-right{justify-content:center}
+}
 /* LAYOUT */
 .page{max-width:1280px;margin:0 auto;padding:1.5rem}
 .section-title{font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;margin-top:0.25rem}
@@ -143,7 +148,7 @@ tbody td{padding:10px 12px;white-space:nowrap}
     <button class="filter-btn" onclick="applyFilter('band','High risk',this)">High Risk</button>
   </div>
   <div class="topbar-right">
-    <div class="last-updated" id="last-updated">9 cases · Baseline</div>
+    <div class="last-updated" id="last-updated">Loading…</div>
     <label class="load-btn">
       ↑ Load CSV
       <input type="file" accept=".csv" id="csv-input" style="display:none" onchange="loadCSV(this)" />
@@ -154,6 +159,11 @@ tbody td{padding:10px 12px;white-space:nowrap}
 <div class="page">
 
 <!-- KPI CARDS -->
+<div id="empty-state" style="display:none;background:var(--white);border:1px dashed var(--gray-200);border-radius:var(--radius-lg);padding:48px;text-align:center;color:var(--gray-400);margin-bottom:1.5rem;">
+  <div style="font-size:32px;margin-bottom:8px;">📋</div>
+  <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;">No reviews submitted yet</div>
+  <div style="font-size:13px;">Submitted 8D reviews will appear here automatically. The dashboard refreshes every 5 minutes.</div>
+</div>
 <div class="kpi-grid" id="kpi-grid">
   <!-- populated by JS -->
 </div>
@@ -314,17 +324,7 @@ tbody td{padding:10px 12px;white-space:nowrap}
 
 <script>
 // ── MASTER DATA (from Excel 8D_Review_Data) ──────────────────────────────────
-let ALL_DATA = [
-  {id:'R-001',title:'Connector intermittent open circuit',type:'Design',sev:'High',d1:3,d2:2,d3:3,d4:3,d5:2,d6:2,d7:3,d8:2,health:0.848,band:'Healthy',dCont:1,dRC:13,dPCA:23,dClose:31,gap:'Root cause rigor',recur:'No',evid:'Moderate'},
-  {id:'R-002',title:'Housing cosmetic scratch at unpack',type:'Manufacturing',sev:'Medium',d1:2,d2:2,d3:2,d4:2,d5:2,d6:2,d7:1,d8:2,health:0.606,band:'Unstable',dCont:0,dRC:8,dPCA:13,dClose:18,gap:'Containment discipline',recur:'No',evid:'Strong'},
-  {id:'R-003',title:'Supplier PCB solder void escape',type:'Supplier',sev:'Critical',d1:2,d2:2,d3:1,d4:1,d5:2,d6:1,d7:1,d8:2,health:0.470,band:'High risk',dCont:3,dRC:17,dPCA:23,dClose:31,gap:'External communication',recur:'Yes',evid:'Moderate'},
-  {id:'R-004',title:'Left/right channel imbalance after ECO',type:'Design',sev:'Critical',d1:2,d2:1,d3:3,d4:2,d5:2,d6:2,d7:2,d8:2,health:0.652,band:'Unstable',dCont:1,dRC:14,dPCA:24,dClose:31,gap:'Problem definition',recur:'No',evid:'Moderate'},
-  {id:'R-005',title:'Adhesive misapplication on seal',type:'Manufacturing',sev:'High',d1:3,d2:2,d3:3,d4:2,d5:2,d6:3,d7:2,d8:2,health:0.773,band:'Unstable',dCont:0,dRC:2,dPCA:7,dClose:13,gap:'Prevent recurrence',recur:'No',evid:'Strong'},
-  {id:'R-006',title:'Supplier label mismatch on subassembly',type:'Supplier',sev:'Medium',d1:1,d2:2,d3:2,d4:1,d5:1,d6:1,d7:1,d8:2,health:0.439,band:'High risk',dCont:1,dRC:11,dPCA:15,dClose:22,gap:'Governance / ownership',recur:'No',evid:'Weak'},
-  {id:'R-007',title:'Tolerance stack-up causing clip crack',type:'Design',sev:'High',d1:2,d2:3,d3:2,d4:3,d5:2,d6:2,d7:2,d8:2,health:0.773,band:'Unstable',dCont:1,dRC:15,dPCA:26,dClose:35,gap:'Root cause rigor',recur:'Yes',evid:'Strong'},
-  {id:'R-008',title:'Torque station out-of-spec drift',type:'Manufacturing',sev:'High',d1:2,d2:2,d3:3,d4:2,d5:2,d6:2,d7:3,d8:2,health:0.758,band:'Unstable',dCont:0,dRC:3,dPCA:8,dClose:15,gap:'Validation of effectiveness',recur:'No',evid:'Strong'},
-  {id:'R-009',title:'Supplier foam density variation',type:'Supplier',sev:'High',d1:2,d2:2,d3:2,d4:2,d5:2,d6:1,d7:1,d8:2,health:0.561,band:'High risk',dCont:2,dRC:15,dPCA:23,dClose:33,gap:'Prevent recurrence',recur:'Yes',evid:'Moderate'},
-];
+let ALL_DATA = [];  // starts empty — fills from live Google Sheet data
 
 let filters = {type:'All', band:'All'};
 let sortKey = 'id'; let sortAsc = true;
@@ -738,6 +738,12 @@ function fetchLiveData() {
 // ── MASTER REFRESH ────────────────────────────────────────────────────────────
 function updateAll() {
   const data = getFiltered();
+  const emptyEl = document.getElementById('empty-state');
+  if (ALL_DATA.length === 0) {
+    if (emptyEl) emptyEl.style.display = 'block';
+  } else {
+    if (emptyEl) emptyEl.style.display = 'none';
+  }
   renderKPI(data);
   renderDStep(data);
   renderBand(data);
