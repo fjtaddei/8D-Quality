@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8D Quality Intelligence Dashboard — SmartValueFlow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy:#1A2B4A; --navy-light:#243660; --navy-faint:#EEF1F6;
+  --green:#2E7D32; --green-light:#E8F5E9;
+  --amber:#E8A020; --amber-light:#FFF8EC;
+  --red:#C0392B; --red-light:#FDEDEC;
+  --blue:#1565C0; --blue-light:#E3F2FD;
+  --gray-50:#F8F9FA; --gray-100:#F1F3F4; --gray-200:#E8EAED;
+  --gray-400:#9AA3AF; --gray-600:#5F6B7A; --gray-800:#2D3748;
+  --white:#FFFFFF;
+  --font:-apple-system,'Segoe UI','Helvetica Neue',sans-serif;
+  --radius:8px; --radius-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-800);font-size:14px;line-height:1.5}
+
+/* TOP BAR */
+.topbar{background:var(--navy);color:white;height:72px;padding:0 2rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2rem;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md)}
+.topbar-brand{display:flex;align-items:center;gap:14px}
+.topbar-brand img{height:54px;width:auto}
+.topbar-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;white-space:nowrap}
+.topbar-subtitle{font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:0.04em;text-transform:uppercase;margin-top:2px}
+.topbar-filters{display:flex;align-items:center;gap:10px}
+.filter-label{font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:0.05em;text-transform:uppercase;margin-right:4px}
+.filter-btn{padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.8);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.filter-btn:hover,.filter-btn.active{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px;justify-self:end}
+.load-btn{padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);border-radius:var(--radius);color:white;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px}
+.load-btn:hover{background:rgba(255,255,255,0.2)}
+.last-updated{font-size:11px;color:rgba(255,255,255,0.45)}
+
+/* LAYOUT */
+.page{max-width:1280px;margin:0 auto;padding:1.5rem}
+.section-title{font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;margin-top:0.25rem}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem}
+.kpi-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,var(--navy))}
+.kpi-label{font-size:11px;font-weight:600;color:var(--gray-400);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:800;color:var(--navy);letter-spacing:-0.02em;line-height:1}
+.kpi-sub{font-size:11px;color:var(--gray-400);margin-top:5px}
+.kpi-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.badge-healthy{background:var(--green-light);color:var(--green)}
+.badge-unstable{background:var(--amber-light);color:#7A5C00}
+.badge-highrisk{background:var(--red-light);color:var(--red)}
+
+/* CHART PANELS */
+.chart-row{display:grid;gap:16px;margin-bottom:1.5rem}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:3fr 2fr}
+.row-full{grid-template-columns:1fr}
+.panel{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.panel-title{font-size:14px;font-weight:700;color:var(--navy)}
+.panel-subtitle{font-size:11px;color:var(--gray-400);margin-top:2px}
+.chart-wrap{position:relative}
+
+/* RAG LEGEND */
+.rag-legend{display:flex;gap:14px;align-items:center;font-size:11px;color:var(--gray-600)}
+.rag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-amber{background:var(--amber)}
+.dot-red{background:var(--red)}
+
+/* CASE TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--navy);color:white}
+thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--gray-100);transition:background 0.1s}
+tbody tr:hover{background:var(--navy-faint)}
+tbody td{padding:10px 12px;white-space:nowrap}
+.severity-pill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.04em}
+.sev-critical{background:#FDEDEC;color:var(--red)}
+.sev-high{background:#FEF9EC;color:#7A5C00}
+.sev-medium{background:var(--blue-light);color:var(--blue)}
+.sev-low{background:var(--green-light);color:var(--green)}
+.health-pill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.health-h{background:var(--green-light);color:var(--green)}
+.health-u{background:var(--amber-light);color:#7A5C00}
+.health-r{background:var(--red-light);color:var(--red)}
+.score-cell{font-weight:700;text-align:center}
+
+/* INTERPRETATION PANEL */
+.interp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.interp-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:12px 14px}
+.interp-trigger{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.interp-action{font-size:11px;color:var(--gray-600);line-height:1.5}
+
+/* TIMELINESS */
+.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.time-card{background:var(--gray-50);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid var(--gray-200)}
+.time-val{font-size:22px;font-weight:800;color:var(--navy)}
+.time-unit{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em}
+.time-label{font-size:11px;color:var(--gray-600);margin-top:4px}
+
+/* FOOTER */
+.footer{background:var(--navy);color:rgba(255,255,255,0.4);text-align:center;padding:16px;font-size:11px;margin-top:2rem}
+.footer strong{color:rgba(255,255,255,0.7)}
+
+/* WEIGHT TABLE */
+.weight-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.weight-table td{padding:6px 10px;border-bottom:1px solid var(--gray-100)}
+.weight-table td:first-child{color:var(--gray-600)}
+.weight-table td:last-child{font-weight:700;text-align:right}
+.w2{color:var(--amber)}
+.w15{color:var(--blue)}
+.w1{color:var(--gray-600)}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="data:image/png;base64,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" alt="SmartValueFlow" />
+    <div>
+      <div class="topbar-title">8D Quality Intelligence Dashboard</div>
+      <div class="topbar-subtitle">Luxshare · Bose Audio Program</div>
+    </div>
+  </div>
+  <div class="topbar-filters">
+    <span class="filter-label">Type</span>
+    <button class="filter-btn active" onclick="applyFilter('type','All',this)">All</button>
+    <button class="filter-btn" onclick="applyFilter('type','Design',this)">Design</button>
+    <button class="filter-btn" onclick="applyFilter('type','Manufacturing',this)">Manufacturing</button>
+    <button class="filter-btn" onclick="applyFilter('type','Supplier',this)">Supplier</button>
+    &nbsp;
+    <span class="filter-label">Band</span>
+    <button class="filter-btn active" onclick="applyFilter('band','All',this)">All</button>
+    <button class="filter-btn" onclick="applyFilter('band','Healthy',this)">Healthy</button>
+    <button class="filter-btn" onclick="applyFilter('band','Unstable',this)">Unstable</button>
+    <button class="filter-btn" onclick="applyFilter('band','High risk',this)">High Risk</button>
+  </div>
+  <div class="topbar-right">
+    <div class="last-updated" id="last-updated">9 cases · Baseline</div>
+    <label class="load-btn">
+      ↑ Load CSV
+      <input type="file" accept=".csv" id="csv-input" style="display:none" onchange="loadCSV(this)" />
+    </label>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- KPI CARDS -->
+<div class="kpi-grid" id="kpi-grid">
+  <!-- populated by JS -->
+</div>
+
+<!-- ROW 1: D-STEP BAR + HEALTH BAND DONUT -->
+<div class="chart-row row-3">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Average Score by D-Step</div>
+        <div class="panel-subtitle">Weighted: D4 & D7 ×2 · D2 & D6 ×1.5 · others ×1 · max 33 pts</div>
+      </div>
+      <div class="rag-legend">
+        <span class="rag-dot dot-green"></span>Strong ≥2.3
+        <span class="rag-dot dot-amber"></span>Adequate 1.5–2.2
+        <span class="rag-dot dot-red"></span>Weak &lt;1.5
+      </div>
+    </div>
+    <div class="chart-wrap" style="height:260px"><canvas id="dstepChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Health Band Distribution</div>
+        <div class="panel-subtitle">Live cases only</div>
+      </div>
+    </div>
+    <div class="chart-wrap" style="height:220px"><canvas id="bandChart"></canvas></div>
+    <div id="band-legend" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<!-- ROW 2: PROBLEM TYPE + GAP PARETO -->
+<div class="chart-row row-2">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Health % by Problem Type</div>
+        <div class="panel-subtitle">Weighted health score — threshold lines at 80% and 60%</div>
+      </div>
+    </div>
+    <div class="chart-wrap" style="height:240px"><canvas id="typeChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Gap Category Pareto</div>
+        <div class="panel-subtitle">Primary weakness by case — cumulative %</div>
+      </div>
+    </div>
+    <div class="chart-wrap" style="height:240px"><canvas id="paretoChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ROW 3: TIMELINESS -->
+<div class="chart-row row-2">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Timeliness — Average Days</div>
+        <div class="panel-subtitle">Measured from Open Date</div>
+      </div>
+    </div>
+    <div class="time-grid" id="time-grid"></div>
+    <div class="chart-wrap" style="height:160px"><canvas id="timeChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Suggested Interpretation</div>
+        <div class="panel-subtitle">From Excel Dashboard · CQI-20 aligned</div>
+      </div>
+    </div>
+    <div class="interp-grid">
+      <div class="interp-card">
+        <div class="interp-trigger">Lowest D-step</div>
+        <div class="interp-action">Use the D-step average chart to prioritise the weakest discipline for coaching.</div>
+      </div>
+      <div class="interp-card">
+        <div class="interp-trigger">By problem type</div>
+        <div class="interp-action">Compare Design vs Manufacturing vs Supplier to find ownership and interface patterns.</div>
+      </div>
+      <div class="interp-card">
+        <div class="interp-trigger">Gap Pareto</div>
+        <div class="interp-action">Use the top 3 gap categories as the first corrective priorities.</div>
+      </div>
+      <div class="interp-card">
+        <div class="interp-trigger">Timeliness</div>
+        <div class="interp-action">Days to containment shows response speed; closure time shows execution discipline.</div>
+      </div>
+      <div class="interp-card">
+        <div class="interp-trigger">Governance</div>
+        <div class="interp-action">Weak scores plus late containment usually indicate unclear ownership or escalation.</div>
+      </div>
+      <div class="interp-card">
+        <div class="interp-trigger">Best action</div>
+        <div class="interp-action">Create standard review rules for D2, D4, D6, and D7 before tightening templates.</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-200)">
+      <div style="font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px">Weighted Scoring Logic</div>
+      <table class="weight-table">
+        <tr><td>D4 Root Cause</td><td class="w2">×2</td></tr>
+        <tr><td>D7 Prevention</td><td class="w2">×2</td></tr>
+        <tr><td>D2 Problem</td><td class="w15">×1.5</td></tr>
+        <tr><td>D6 Validation</td><td class="w15">×1.5</td></tr>
+        <tr><td>D1, D3, D5, D8</td><td class="w1">×1</td></tr>
+        <tr><td><strong>Max Score</strong></td><td><strong>33 pts</strong></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 4: CASE TABLE -->
+<div class="panel" style="margin-bottom:1.5rem">
+  <div class="panel-header">
+    <div>
+      <div class="panel-title">Case Review Detail</div>
+      <div class="panel-subtitle" id="table-subtitle">All cases · click column header to sort</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" id="search-box" placeholder="Search cases..." style="padding:6px 10px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:12px;width:180px" oninput="renderTable()" />
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="case-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('id')" style="cursor:pointer">ID ↕</th>
+          <th>Issue Title</th>
+          <th onclick="sortTable('type')" style="cursor:pointer">Type ↕</th>
+          <th onclick="sortTable('sev')" style="cursor:pointer">Severity ↕</th>
+          <th style="text-align:center">D1</th>
+          <th style="text-align:center">D2</th>
+          <th style="text-align:center">D3</th>
+          <th style="text-align:center">D4</th>
+          <th style="text-align:center">D5</th>
+          <th style="text-align:center">D6</th>
+          <th style="text-align:center">D7</th>
+          <th style="text-align:center">D8</th>
+          <th onclick="sortTable('health')" style="cursor:pointer;text-align:center">Health % ↕</th>
+          <th>Band</th>
+          <th style="text-align:center">Days Contain</th>
+          <th>Gap Category</th>
+          <th>Recurrence</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<div class="footer">
+  <strong>SmartValueFlow</strong> · 8D Quality Intelligence Platform · Scoring based on AIAG CQI-20 · Weighted Health % max 33 pts
+</div>
+
+<script>
+// ── MASTER DATA (from Excel 8D_Review_Data) ──────────────────────────────────
+let ALL_DATA = [
+  {id:'R-001',title:'Connector intermittent open circuit',type:'Design',sev:'High',d1:3,d2:2,d3:3,d4:3,d5:2,d6:2,d7:3,d8:2,health:0.848,band:'Healthy',dCont:1,dRC:13,dPCA:23,dClose:31,gap:'Root cause rigor',recur:'No',evid:'Moderate'},
+  {id:'R-002',title:'Housing cosmetic scratch at unpack',type:'Manufacturing',sev:'Medium',d1:2,d2:2,d3:2,d4:2,d5:2,d6:2,d7:1,d8:2,health:0.606,band:'Unstable',dCont:0,dRC:8,dPCA:13,dClose:18,gap:'Containment discipline',recur:'No',evid:'Strong'},
+  {id:'R-003',title:'Supplier PCB solder void escape',type:'Supplier',sev:'Critical',d1:2,d2:2,d3:1,d4:1,d5:2,d6:1,d7:1,d8:2,health:0.470,band:'High risk',dCont:3,dRC:17,dPCA:23,dClose:31,gap:'External communication',recur:'Yes',evid:'Moderate'},
+  {id:'R-004',title:'Left/right channel imbalance after ECO',type:'Design',sev:'Critical',d1:2,d2:1,d3:3,d4:2,d5:2,d6:2,d7:2,d8:2,health:0.652,band:'Unstable',dCont:1,dRC:14,dPCA:24,dClose:31,gap:'Problem definition',recur:'No',evid:'Moderate'},
+  {id:'R-005',title:'Adhesive misapplication on seal',type:'Manufacturing',sev:'High',d1:3,d2:2,d3:3,d4:2,d5:2,d6:3,d7:2,d8:2,health:0.773,band:'Unstable',dCont:0,dRC:2,dPCA:7,dClose:13,gap:'Prevent recurrence',recur:'No',evid:'Strong'},
+  {id:'R-006',title:'Supplier label mismatch on subassembly',type:'Supplier',sev:'Medium',d1:1,d2:2,d3:2,d4:1,d5:1,d6:1,d7:1,d8:2,health:0.439,band:'High risk',dCont:1,dRC:11,dPCA:15,dClose:22,gap:'Governance / ownership',recur:'No',evid:'Weak'},
+  {id:'R-007',title:'Tolerance stack-up causing clip crack',type:'Design',sev:'High',d1:2,d2:3,d3:2,d4:3,d5:2,d6:2,d7:2,d8:2,health:0.773,band:'Unstable',dCont:1,dRC:15,dPCA:26,dClose:35,gap:'Root cause rigor',recur:'Yes',evid:'Strong'},
+  {id:'R-008',title:'Torque station out-of-spec drift',type:'Manufacturing',sev:'High',d1:2,d2:2,d3:3,d4:2,d5:2,d6:2,d7:3,d8:2,health:0.758,band:'Unstable',dCont:0,dRC:3,dPCA:8,dClose:15,gap:'Validation of effectiveness',recur:'No',evid:'Strong'},
+  {id:'R-009',title:'Supplier foam density variation',type:'Supplier',sev:'High',d1:2,d2:2,d3:2,d4:2,d5:2,d6:1,d7:1,d8:2,health:0.561,band:'High risk',dCont:2,dRC:15,dPCA:23,dClose:33,gap:'Prevent recurrence',recur:'Yes',evid:'Moderate'},
+];
+
+let filters = {type:'All', band:'All'};
+let sortKey = 'id'; let sortAsc = true;
+let charts = {};
+
+// ── FILTER LOGIC ─────────────────────────────────────────────────────────────
+function getFiltered() {
+  return ALL_DATA.filter(d => {
+    const typeOk = filters.type === 'All' || d.type === filters.type;
+    const bandOk = filters.band === 'All' ||
+      (filters.band === 'Healthy' && d.band === 'Healthy') ||
+      (filters.band === 'Unstable' && d.band === 'Unstable') ||
+      (filters.band === 'High risk' && d.band === 'High risk');
+    const search = document.getElementById('search-box')?.value?.toLowerCase() || '';
+    const searchOk = !search || d.title.toLowerCase().includes(search) ||
+      d.id.toLowerCase().includes(search) || d.gap.toLowerCase().includes(search);
+    return typeOk && bandOk && searchOk;
+  });
+}
+
+function applyFilter(key, val, btn) {
+  filters[key] = val;
+  btn.closest('.topbar-filters').querySelectorAll('.filter-btn').forEach(b => {
+    if (b.dataset.key === key || !b.dataset.key) {}
+  });
+  // reset same-group buttons
+  const siblings = btn.parentElement.querySelectorAll('.filter-btn');
+  let inGroup = false;
+  siblings.forEach(b => {
+    if (b === btn) inGroup = true;
+    if (!inGroup && b.nextElementSibling === btn) inGroup = true;
+  });
+  // simpler: deactivate all, activate clicked
+  btn.closest('.topbar-filters').querySelectorAll('.filter-btn').forEach(b => {
+    if (b.textContent.trim() === val || (val === 'All' && b.textContent.trim() === 'All' && b.onclick.toString().includes(`'${key}'`))) {}
+  });
+  // just toggle within group
+  const groupStart = ['All','Design','Manufacturing','Supplier'];
+  const bandGroup = ['All','Healthy','Unstable','High Risk'];
+  const btnText = btn.textContent.trim();
+  btn.closest('.topbar-filters').querySelectorAll('.filter-btn').forEach(b => {
+    const t = b.textContent.trim();
+    if (key === 'type' && groupStart.includes(t)) b.classList.remove('active');
+    if (key === 'band' && (bandGroup.includes(t) || t === 'High Risk')) b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  updateAll();
+}
+
+// ── CHART HELPERS ─────────────────────────────────────────────────────────────
+function ragColor(score) {
+  if (score >= 2.3) return '#2E7D32';
+  if (score >= 1.5) return '#E8A020';
+  return '#C0392B';
+}
+function ragColorAlpha(score, a) {
+  const c = ragColor(score);
+  const r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// ── KPI CARDS ─────────────────────────────────────────────────────────────────
+function renderKPI(data) {
+  const n = data.length;
+  const avgH = n ? data.reduce((s,d)=>s+d.health,0)/n : 0;
+  const healthy = data.filter(d=>d.band==='Healthy').length;
+  const highRisk = data.filter(d=>d.band==='High risk').length;
+  const recur = data.filter(d=>d.recur==='Yes').length;
+  const priority = data.filter(d=>d.sev==='Critical'||d.sev==='High').length;
+  const band = avgH>=0.8?'Healthy':avgH>=0.6?'Unstable':'High risk';
+  const bandClass = band==='Healthy'?'badge-healthy':band==='Unstable'?'badge-unstable':'badge-highrisk';
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card" style="--accent:#1A2B4A">
+      <div class="kpi-label">Total Cases</div>
+      <div class="kpi-value">${n}</div>
+      <div class="kpi-sub">Live reviewed 8Ds</div>
+    </div>
+    <div class="kpi-card" style="--accent:${avgH>=0.8?'#2E7D32':avgH>=0.6?'#E8A020':'#C0392B'}">
+      <div class="kpi-label">Avg Weighted Health</div>
+      <div class="kpi-value" style="color:${avgH>=0.8?'#2E7D32':avgH>=0.6?'#7A5C00':'#C0392B'}">${Math.round(avgH*100)}%</div>
+      <div class="kpi-sub"><span class="kpi-badge ${bandClass}">${band}</span></div>
+    </div>
+    <div class="kpi-card" style="--accent:#2E7D32">
+      <div class="kpi-label">Healthy Cases</div>
+      <div class="kpi-value" style="color:#2E7D32">${healthy}</div>
+      <div class="kpi-sub">${n?Math.round(healthy/n*100):0}% of total · ≥80%</div>
+    </div>
+    <div class="kpi-card" style="--accent:#C0392B">
+      <div class="kpi-label">High Risk Cases</div>
+      <div class="kpi-value" style="color:#C0392B">${highRisk}</div>
+      <div class="kpi-sub">${n?Math.round(highRisk/n*100):0}% of total · &lt;60%</div>
+    </div>
+    <div class="kpi-card" style="--accent:#E8A020">
+      <div class="kpi-label">Recurrence</div>
+      <div class="kpi-value" style="color:${recur>0?'#C0392B':'#2E7D32'}">${recur}</div>
+      <div class="kpi-sub">${priority} priority review cases</div>
+    </div>
+  `;
+}
+
+// ── D-STEP CHART ──────────────────────────────────────────────────────────────
+function renderDStep(data) {
+  const steps = ['D1 Team','D2 Problem','D3 Containment','D4 Root Cause','D5 Action','D6 Validation','D7 Prevention','D8 Closure'];
+  const keys = ['d1','d2','d3','d4','d5','d6','d7','d8'];
+  const avgs = keys.map(k => {
+    const vals = data.map(d=>d[k]).filter(v=>v!=null);
+    return vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2) : 0;
+  });
+  const colors = avgs.map(v=>ragColor(v));
+  const ctx = document.getElementById('dstepChart').getContext('2d');
+  if (charts.dstep) charts.dstep.destroy();
+  charts.dstep = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:steps,
+      datasets:[{
+        data:avgs,
+        backgroundColor:colors.map(c=>c+'CC'),
+        borderColor:colors,
+        borderWidth:1.5,
+        borderRadius:4,
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        label: ctx => ` ${ctx.raw.toFixed(2)} / 3  (${ragColor(ctx.raw)==='#2E7D32'?'Strong':ragColor(ctx.raw)==='#E8A020'?'Adequate':'Weak'})`
+      }}},
+      scales:{
+        x:{min:0,max:3,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,0.05)'},
+          afterDataLimits(scale){ scale.max=3; }},
+        y:{grid:{display:false},ticks:{font:{size:12}}}
+      },
+      animation:{duration:400}
+    }
+  });
+}
+
+// ── BAND DONUT ────────────────────────────────────────────────────────────────
+function renderBand(data) {
+  const healthy = data.filter(d=>d.band==='Healthy').length;
+  const unstable = data.filter(d=>d.band==='Unstable').length;
+  const highrisk = data.filter(d=>d.band==='High risk').length;
+  const ctx = document.getElementById('bandChart').getContext('2d');
+  if (charts.band) charts.band.destroy();
+  charts.band = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels:['Healthy','Unstable','High Risk'],
+      datasets:[{
+        data:[healthy,unstable,highrisk],
+        backgroundColor:['#2E7D32CC','#E8A020CC','#C0392BCC'],
+        borderColor:['#2E7D32','#E8A020','#C0392B'],
+        borderWidth:2, hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'65%',
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw} case${ctx.raw!==1?'s':''}`}}
+      }
+    }
+  });
+  document.getElementById('band-legend').innerHTML = `
+    <div style="display:flex;gap:14px;justify-content:center;font-size:12px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#2E7D32;display:inline-block"></span>Healthy (${healthy})</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#E8A020;display:inline-block"></span>Unstable (${unstable})</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#C0392B;display:inline-block"></span>High Risk (${highrisk})</span>
+    </div>`;
+}
+
+// ── PROBLEM TYPE CHART ────────────────────────────────────────────────────────
+function renderType(data) {
+  const types = ['Design','Manufacturing','Supplier'];
+  const avgs = types.map(t => {
+    const rows = data.filter(d=>d.type===t);
+    return rows.length ? +(rows.reduce((s,d)=>s+d.health,0)/rows.length*100).toFixed(1) : null;
+  });
+  const counts = types.map(t=>data.filter(d=>d.type===t).length);
+  const ctx = document.getElementById('typeChart').getContext('2d');
+  if (charts.type) charts.type.destroy();
+  charts.type = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:types.map((t,i)=>`${t} (${counts[i]})`),
+      datasets:[{
+        label:'Avg Health %',
+        data:avgs,
+        backgroundColor:avgs.map(v=>v===null?'#ddd':v>=80?'#2E7D32CC':v>=60?'#E8A020CC':'#C0392BCC'),
+        borderColor:avgs.map(v=>v===null?'#ccc':v>=80?'#2E7D32':v>=60?'#E8A020':'#C0392B'),
+        borderWidth:1.5, borderRadius:4,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.raw!==null?ctx.raw.toFixed(1)+'%':'No data'}`}}
+      },
+      scales:{
+        y:{min:0,max:100,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{grid:{display:false}}
+      },
+      plugins:{
+        annotation:{
+          annotations:{
+            line80:{type:'line',yMin:80,yMax:80,borderColor:'#2E7D3280',borderWidth:1.5,borderDash:[4,4],label:{content:'Healthy 80%',display:true,position:'end',font:{size:10},color:'#2E7D32'}},
+            line60:{type:'line',yMin:60,yMax:60,borderColor:'#E8A02080',borderWidth:1.5,borderDash:[4,4],label:{content:'Threshold 60%',display:true,position:'end',font:{size:10},color:'#7A5C00'}}
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── PARETO CHART ──────────────────────────────────────────────────────────────
+function renderPareto(data) {
+  const gapMap = {};
+  data.forEach(d=>{ gapMap[d.gap] = (gapMap[d.gap]||0)+1; });
+  const sorted = Object.entries(gapMap).sort((a,b)=>b[1]-a[1]);
+  const labels = sorted.map(e=>e[0]);
+  const counts = sorted.map(e=>e[1]);
+  const total = counts.reduce((a,b)=>a+b,0);
+  let cum = 0;
+  const cumPct = counts.map(c=>{ cum+=c; return total?+(cum/total*100).toFixed(1):0; });
+  const ctx = document.getElementById('paretoChart').getContext('2d');
+  if (charts.pareto) charts.pareto.destroy();
+  charts.pareto = new Chart(ctx, {
+    data:{
+      labels,
+      datasets:[
+        {type:'bar',label:'Cases',data:counts,backgroundColor:'#1A2B4ACC',borderColor:'#1A2B4A',borderWidth:1.5,borderRadius:3,yAxisID:'y'},
+        {type:'line',label:'Cumulative %',data:cumPct,borderColor:'#E8A020',backgroundColor:'transparent',borderWidth:2,pointBackgroundColor:'#E8A020',pointRadius:4,yAxisID:'y2'}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='bar'?` ${ctx.raw} case${ctx.raw!==1?'s':''}`:` ${ctx.raw}% cumulative`}}},
+      scales:{
+        y:{position:'left',min:0,ticks:{stepSize:1},title:{display:true,text:'Cases',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},
+        y2:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%'},grid:{display:false}},
+        x:{grid:{display:false},ticks:{font:{size:10},maxRotation:30}}
+      },
+      animation:{duration:400}
+    }
+  });
+}
+
+// ── TIMELINESS ────────────────────────────────────────────────────────────────
+function renderTimeliness(data) {
+  const avg = (key) => {
+    const vals = data.map(d=>d[key]).filter(v=>v!=null&&!isNaN(v));
+    return vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : null;
+  };
+  const aC = avg('dCont'), aRC = avg('dRC'), aPCA = avg('dPCA'), aCl = avg('dClose');
+  document.getElementById('time-grid').innerHTML = [
+    [aC,'Days to Containment','≤1d Critical | ≤2d High'],
+    [aRC,'Days to Root Cause','Target: ≤14d'],
+    [aPCA,'Days to PCA','Target: ≤21d'],
+    [aCl,'Days to Closure','Target: ≤30d']
+  ].map(([v,label,guide])=>`
+    <div class="time-card">
+      <div class="time-val" style="color:${v===null?'#9AA3AF':v<=14?'#2E7D32':v<=21?'#E8A020':'#C0392B'}">${v===null?'—':v}</div>
+      <div class="time-unit">days avg</div>
+      <div class="time-label" style="font-size:11px;font-weight:600;color:#2D3748;margin-top:4px">${label}</div>
+      <div class="time-label" style="font-size:10px;color:#9AA3AF">${guide}</div>
+    </div>`).join('');
+
+  const byType = ['Design','Manufacturing','Supplier'].map(t=>{
+    const rows = data.filter(d=>d.type===t);
+    return rows.length ? +(rows.reduce((s,d)=>s+(d.dClose||0),0)/rows.length).toFixed(1) : null;
+  });
+  const ctx = document.getElementById('timeChart').getContext('2d');
+  if (charts.time) charts.time.destroy();
+  charts.time = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Design','Manufacturing','Supplier'],
+      datasets:[
+        {label:'Days to Containment',data:['Design','Manufacturing','Supplier'].map(t=>{const r=data.filter(d=>d.type===t);return r.length?+(r.reduce((s,d)=>s+(d.dCont||0),0)/r.length).toFixed(1):null}),backgroundColor:'#1565C0AA',borderRadius:3},
+        {label:'Days to RC',data:['Design','Manufacturing','Supplier'].map(t=>{const r=data.filter(d=>d.type===t);return r.length?+(r.reduce((s,d)=>s+(d.dRC||0),0)/r.length).toFixed(1):null}),backgroundColor:'#E8A020AA',borderRadius:3},
+        {label:'Days to Closure',data:byType,backgroundColor:'#1A2B4AAA',borderRadius:3}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},
+      scales:{
+        x:{grid:{display:false}},
+        y:{title:{display:true,text:'Days',font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+      },
+      animation:{duration:400}
+    }
+  });
+}
+
+// ── CASE TABLE ────────────────────────────────────────────────────────────────
+function sortTable(key) {
+  if (sortKey===key) sortAsc=!sortAsc; else { sortKey=key; sortAsc=true; }
+  renderTable();
+}
+function scoreColor(v) {
+  return v<=1?'color:#C0392B':v<=2?'color:#7A5C00':'color:#2E7D32';
+}
+function renderTable() {
+  const data = getFiltered();
+  const keyMap = {id:'id',type:'type',sev:'sev',health:'health'};
+  const sorted = [...data].sort((a,b)=>{
+    let av=a[keyMap[sortKey]||sortKey], bv=b[keyMap[sortKey]||sortKey];
+    if (typeof av==='string') return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
+    return sortAsc?av-bv:bv-av;
+  });
+  const sevClass = s=>s==='Critical'?'sev-critical':s==='High'?'sev-high':s==='Medium'?'sev-medium':'sev-low';
+  const bandClass = b=>b==='Healthy'?'health-h':b==='Unstable'?'health-u':'health-r';
+  document.getElementById('table-body').innerHTML = sorted.map(d=>`
+    <tr>
+      <td style="font-weight:700;color:var(--navy)">${d.id}</td>
+      <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${d.title}">${d.title}</td>
+      <td>${d.type}</td>
+      <td><span class="severity-pill ${sevClass(d.sev)}">${d.sev}</span></td>
+      ${['d1','d2','d3','d4','d5','d6','d7','d8'].map(k=>`<td class="score-cell" style="${scoreColor(d[k])}">${d[k]}</td>`).join('')}
+      <td style="text-align:center;font-weight:700;color:${d.health>=0.8?'#2E7D32':d.health>=0.6?'#7A5C00':'#C0392B'}">${Math.round(d.health*100)}%</td>
+      <td><span class="health-pill ${bandClass(d.band)}">${d.band==='High risk'?'High Risk':d.band}</span></td>
+      <td style="text-align:center;color:${d.dCont>2?'#C0392B':'#2E7D32'};font-weight:600">${d.dCont}d</td>
+      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--gray-600)">${d.gap}</td>
+      <td style="text-align:center;color:${d.recur==='Yes'?'#C0392B':'#2E7D32'};font-weight:700">${d.recur}</td>
+    </tr>`).join('');
+  document.getElementById('table-subtitle').textContent = `${data.length} case${data.length!==1?'s':''} shown · click column header to sort`;
+}
+
+// ── CSV LOADER ────────────────────────────────────────────────────────────────
+// Live data source — published Google Sheet CSV
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSq_rOmz0N7PNU5a0jqqpK86Kl7z69H0OvkcdDgENaPgvsxsed6nqhfI2vz4MCJdaBH2H3oo9xeGoZP/pub?gid=0&single=true&output=csv";
+
+// Shared CSV → records parser
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+  const rows = lines.slice(1).map(line=>{
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,))/g)||[];
+    const clean = vals.map(v=>v.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+    const obj = {};
+    headers.forEach((h,i)=>obj[h]=clean[i]||'');
+    return obj;
+  }).filter(r=>r['Review ID']);
+  return rows.map(r=>{
+    let hraw = (r['Health %']||'').toString().replace('%','');
+    let h = parseFloat(hraw); h = isNaN(h)?0:(h>1?h/100:h);
+    const hb = (r['Health Band']||'');
+    const band = hb.includes('High') ? 'High risk'
+               : (hb.includes('Healthy') ? 'Healthy' : 'Unstable');
+    return {
+      id:r['Review ID'], title:r['Issue Title']||'', type:r['Problem Type']||'',
+      sev:r['Severity']||'', d1:+r['D1 Team']||0, d2:+r['D2 Problem']||0,
+      d3:+r['D3 Containment']||0, d4:+(r['D4 Root Cause']||r['D4a Root Cause'])||0,
+      d4b:+r['D4b Escape Point']||0,
+      d5:+r['D5 Action Selection']||0, d6:+r['D6 Validation']||0,
+      d7:+r['D7 Prevention']||0, d8:+r['D8 Closure']||0,
+      health:h, band:band,
+      dCont:+r['Days to Containment']||0, dRC:+r['Days to RC']||0,
+      dPCA:+r['Days to PCA']||0, dClose:+r['Days to Closure']||0,
+      gap:r['Primary Gap Category']||'', recur:r['Recurrence (30/60/90)']||'No',
+      evid:r['Evidence Strength']||''
+    };
+  });
+}
+
+// Manual upload (fallback)
+function loadCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const recs = parseCSV(e.target.result);
+    if (recs.length) {
+      ALL_DATA = recs;
+      document.getElementById('last-updated').textContent = `${ALL_DATA.length} cases · ${file.name}`;
+      updateAll();
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Live fetch from the published Google Sheet on load
+function fetchLiveData() {
+  const tag = document.getElementById('last-updated');
+  if (SHEET_URL.indexOf('PASTE_') === 0) { return; }   // not configured yet
+  tag.textContent = 'Loading live data…';
+  fetch(SHEET_URL + '&cachebust=' + Date.now())
+    .then(r => r.ok ? r.text() : Promise.reject(r.status))
+    .then(text => {
+      const recs = parseCSV(text);
+      if (recs.length) {
+        ALL_DATA = recs;
+        updateAll();
+        const now = new Date();
+        tag.textContent = `${ALL_DATA.length} cases · live · updated ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+      } else {
+        tag.textContent = `${ALL_DATA.length} cases · sample data (sheet empty)`;
+      }
+    })
+    .catch(() => {
+      tag.textContent = `${ALL_DATA.length} cases · sample data (live fetch failed)`;
+    });
+}
+
+// ── MASTER REFRESH ────────────────────────────────────────────────────────────
+function updateAll() {
+  const data = getFiltered();
+  renderKPI(data);
+  renderDStep(data);
+  renderBand(data);
+  renderType(data);
+  renderPareto(data);
+  renderTimeliness(data);
+  renderTable();
+}
+
+updateAll();        // initial render with sample data
+fetchLiveData();    // then pull live data from the Sheet
+setInterval(fetchLiveData, 300000);  // refresh every 5 min
+</script>
+</body>
+</html>

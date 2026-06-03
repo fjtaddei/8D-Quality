@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8D Review Entry — Quality Intelligence</title>
+<style>
+:root {
+  --navy: #1A2B4A;
+  --navy-light: #243660;
+  --amber: #E8A020;
+  --amber-light: #FFF3DC;
+  --danger: #C0392B;
+  --danger-light: #FDEDEC;
+  --success: #1E8449;
+  --success-light: #EAFAF1;
+  --warning-light: #FFF9EC;
+  --gray-50: #F8F9FA;
+  --gray-100: #F1F3F4;
+  --gray-200: #E8EAED;
+  --gray-400: #9AA3AF;
+  --gray-600: #5F6B7A;
+  --gray-800: #2D3748;
+  --white: #FFFFFF;
+  --font: -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--gray-50);
+  color: var(--gray-800);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.top-bar {
+  background: var(--navy);
+  color: white;
+  padding: 0 2rem;
+  height: 72px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+.top-bar > div:last-child { justify-self: end; }
+
+.top-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.top-bar-title .dot {
+  width: 8px; height: 8px;
+  background: var(--amber);
+  border-radius: 50%;
+}
+
+.live-score {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.live-score .pct {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.live-score .band {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.band-healthy { background: #1E844920; color: #1E8449; border: 1px solid #1E844940; }
+.band-unstable { background: #E8A02020; color: #B07010; border: 1px solid #E8A02040; }
+.band-highrisk { background: #C0392B20; color: #C0392B; border: 1px solid #C0392B40; }
+
+.layout {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 6rem;
+}
+
+.section-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.section-header {
+  background: var(--navy);
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-num {
+  width: 24px; height: 24px;
+  background: var(--amber);
+  color: var(--navy);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.section-body {
+  padding: 20px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field.full { grid-column: 1 / -1; }
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+label .req { color: var(--danger); margin-left: 2px; }
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--gray-800);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(26,43,74,0.08);
+}
+
+input.error, select.error, textarea.error {
+  border-color: var(--danger);
+  background: var(--danger-light);
+}
+
+textarea { resize: vertical; min-height: 80px; }
+
+.helper { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.alert-warning {
+  background: var(--warning-light);
+  border: 1px solid #E8A02060;
+  color: #7A5C00;
+}
+
+.alert-danger {
+  background: var(--danger-light);
+  border: 1px solid #C0392B40;
+  color: var(--danger);
+}
+
+.alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+.days-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--gray-600);
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.days-badge.warn { background: var(--warning-light); border-color: #E8A02060; color: #7A5C00; }
+.days-badge.ok { background: var(--success-light); border-color: #1E844940; color: var(--success); }
+
+.toggle-group {
+  display: flex;
+  gap: 6px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  color: var(--gray-600);
+  transition: all 0.15s;
+}
+
+.toggle-btn:hover { border-color: var(--navy); color: var(--navy); }
+.toggle-btn.active-yes { background: var(--success-light); border-color: var(--success); color: var(--success); font-weight: 600; }
+.toggle-btn.active-no { background: var(--danger-light); border-color: var(--danger); color: var(--danger); font-weight: 600; }
+
+.d-step-block {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.d-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+  cursor: pointer;
+  user-select: none;
+}
+
+.d-step-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.d-tag {
+  background: var(--navy);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.d-name { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+
+.weight-tag {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.weight-2x { background: #FFF3DC; border-color: #E8A020; color: #7A5C00; }
+.weight-1-5x { background: #EBF5FB; border-color: #2980B9; color: #1A5276; }
+.weight-1x { background: var(--gray-100); border-color: var(--gray-200); color: var(--gray-600); }
+
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-num {
+  font-size: 22px;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+}
+
+.score-0 { color: var(--danger); }
+.score-1 { color: #E67E22; }
+.score-2 { color: #2980B9; }
+.score-3 { color: var(--success); }
+
+.d-step-body { padding: 16px; }
+
+.score-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.score-btn {
+  padding: 10px 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: var(--white);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+}
+
+.score-btn:hover { border-color: var(--navy); transform: translateY(-1px); }
+
+.score-btn .score-val {
+  font-size: 20px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.score-btn .score-label {
+  font-size: 10px;
+  color: var(--gray-400);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+}
+
+.score-btn.selected-0 { background: #FDEDEC; border-color: var(--danger); }
+.score-btn.selected-0 .score-val { color: var(--danger); }
+.score-btn.selected-1 { background: #FEF9EC; border-color: #E67E22; }
+.score-btn.selected-1 .score-val { color: #E67E22; }
+.score-btn.selected-2 { background: #EBF5FB; border-color: #2980B9; }
+.score-btn.selected-2 .score-val { color: #2980B9; }
+.score-btn.selected-3 { background: var(--success-light); border-color: var(--success); }
+.score-btn.selected-3 .score-val { color: var(--success); }
+
+.rubric-box {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+.rubric-box strong { color: var(--gray-800); }
+
+.d-step-alert {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  display: none;
+}
+
+.d-step-alert.show { display: flex; align-items: center; gap: 8px; }
+.d-step-alert.warn { background: var(--warning-light); border: 1px solid #E8A02060; color: #7A5C00; }
+.d-step-alert.danger { background: var(--danger-light); border: 1px solid #C0392B40; color: var(--danger); }
+
+.submit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  padding: 14px 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 99;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+}
+
+.error-summary {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.btn-submit {
+  background: var(--navy);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-submit:hover { background: var(--navy-light); }
+
+.btn-submit .arrow { font-size: 16px; }
+
+.success-banner {
+  display: none;
+  background: var(--success-light);
+  border: 1px solid #1E844940;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  color: var(--success);
+  font-weight: 600;
+  font-size: 14px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.success-banner.show { display: flex; }
+
+@media (max-width: 640px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .score-buttons { grid-template-columns: repeat(2, 1fr); }
+  .layout { padding: 1rem 1rem 6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-title">
+    <span class="dot"></span>
+    <span style="color:rgba(255,255,255,0.7); font-size:12px; letter-spacing:0.08em; text-transform:uppercase;">8D Effectiveness Review</span>
+  </div>
+  <div class="live-score">
+    <span style="color: rgba(255,255,255,0.5); font-size: 11px;">Weighted Health</span>
+    <span class="pct" id="live-pct">—</span>
+    <span class="band band-highrisk" id="live-band" style="display:none"></span>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px; padding: 8px 0;">
+    <img src="data:image/png;base64,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" alt="SmartValueFlow" style="height:54px; width:auto;" />
+  </div>
+</div>
+
+<div class="layout">
+
+  <div style="margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--gray-200);">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+      <div>
+        <h1 style="font-size:22px; font-weight:700; color:var(--navy); margin-bottom:6px; letter-spacing:-0.01em;">
+          8D Report Effectiveness Review
+        </h1>
+        <p style="font-size:13px; color:var(--gray-600); max-width:560px; line-height:1.6;">
+          Score completed 8D reports against the weighted 9-discipline rubric. Each submission downloads a CSV row ready to append to your master data sheet — the live dashboard updates automatically.
+        </p>
+      </div>
+      <div style="flex-shrink:0; background:var(--navy); border-radius:var(--radius-lg); padding:10px 16px; text-align:center; min-width:110px;">
+        <div style="font-size:10px; color:rgba(255,255,255,0.55); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:4px;">Max Score</div>
+        <div style="font-size:22px; font-weight:700; color:var(--amber);">33 pts</div>
+        <div style="font-size:10px; color:rgba(255,255,255,0.55); margin-top:2px;">D4 & D7 weighted ×2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-banner" id="success-banner">
+    ✓ Review submitted. CSV row downloaded — append it to your master data sheet.
+  </div>
+
+  <!-- SECTION 1: CASE INFORMATION -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Case Information</h2>
+    </div>
+    <div class="section-body">
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="field">
+          <label>Review ID <span class="req">*</span></label>
+          <input type="text" id="review-id" placeholder="R-001" />
+          <span class="helper">Auto-prefix: R-. Increment from last entry.</span>
+        </div>
+        <div class="field">
+          <label>Case ID <span class="req">*</span></label>
+          <input type="text" id="case-id" placeholder="8D-2401" />
+        </div>
+      </div>
+      <div class="field full" style="margin-bottom:14px">
+        <label>Issue Title <span class="req">*</span></label>
+        <input type="text" id="issue-title" placeholder="e.g. Connector intermittent open circuit — include the failure mode, not just 'quality issue'" />
+      </div>
+      <div class="grid-3" style="margin-bottom:14px">
+        <div class="field">
+          <label>Problem Type <span class="req">*</span></label>
+          <select id="problem-type">
+            <option value="">— Select —</option>
+            <option>Design</option>
+            <option>Manufacturing</option>
+            <option>Supplier</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Severity <span class="req">*</span></label>
+          <select id="severity" onchange="checkSeverityWarning()">
+            <option value="">— Select —</option>
+            <option>Critical</option>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="status">
+            <option value="Closed">Closed</option>
+          </select>
+          <span class="helper">Only closed 8Ds are scored.</span>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="field">
+          <label>Customer / Program <span class="req">*</span></label>
+          <input type="text" id="customer" placeholder="e.g. Bose Audio" />
+        </div>
+        <div class="field">
+          <label>Site / Area <span class="req">*</span></label>
+          <input type="text" id="site" placeholder="e.g. Tijuana – Line A" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Owner Function <span class="req">*</span></label>
+          <select id="owner-fn">
+            <option value="">— Select —</option>
+            <option>Customer Quality</option>
+            <option>Supplier Quality</option>
+            <option>Operations</option>
+            <option>Manufacturing Engineering</option>
+            <option>Quality</option>
+            <option>Program Management</option>
+            <option>NPI / Test</option>
+            <option>Design Engineering</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Reviewer Name <span class="req">*</span></label>
+          <input type="text" id="reviewer" placeholder="Full name of independent reviewer" />
+        </div>
+      </div>
+      <div class="field full" style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--gray-200)">
+        <label>Access Code <span class="req">*</span></label>
+        <input type="password" id="access-code" placeholder="Organisation access code" autocomplete="off" />
+        <span class="helper">Required to submit. Provided separately by your organisation.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: TIMELINE -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>Timeline</h2>
+    </div>
+    <div class="section-body">
+      <div class="grid-3" style="margin-bottom:10px">
+        <div class="field">
+          <label>Open Date <span class="req">*</span></label>
+          <input type="date" id="date-open" onchange="calcDays()" />
+        </div>
+        <div class="field">
+          <label>Containment Date <span class="req">*</span></label>
+          <input type="date" id="date-contain" onchange="calcDays()" />
+        </div>
+        <div class="field">
+          <label>Root Cause Confirmed</label>
+          <input type="date" id="date-rc" onchange="calcDays()" />
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="field">
+          <label>PCA Implemented</label>
+          <input type="date" id="date-pca" onchange="calcDays()" />
+        </div>
+        <div class="field">
+          <label>Closed Date <span class="req">*</span></label>
+          <input type="date" id="date-close" onchange="calcDays()" />
+        </div>
+      </div>
+      <div id="days-summary" style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+      <div id="containment-warn" class="alert alert-warning" style="display:none; margin-top:10px">
+        <span class="alert-icon">⚠</span>
+        <span id="containment-warn-text"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: OUTCOMES -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>Outcomes</h2>
+    </div>
+    <div class="section-body">
+      <div class="grid-3">
+        <div class="field">
+          <label>Root Cause Confirmed <span class="req">*</span></label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="setToggle('rc-confirm','Yes',this)" id="rc-confirm-yes">Yes</button>
+            <button class="toggle-btn" onclick="setToggle('rc-confirm','No',this)" id="rc-confirm-no">No</button>
+          </div>
+          <input type="hidden" id="rc-confirm" />
+        </div>
+        <div class="field">
+          <label>Permanent CA Implemented <span class="req">*</span></label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="setToggle('pca-impl','Yes',this)" id="pca-impl-yes">Yes</button>
+            <button class="toggle-btn" onclick="setToggle('pca-impl','No',this)" id="pca-impl-no">No</button>
+          </div>
+          <input type="hidden" id="pca-impl" />
+        </div>
+        <div class="field">
+          <label>Recurrence (30/60/90d) <span class="req">*</span></label>
+          <div class="toggle-group">
+            <button class="toggle-btn" onclick="setToggle('recurrence','Yes',this)" id="recurrence-yes">Yes</button>
+            <button class="toggle-btn" onclick="setToggle('recurrence','No',this)" id="recurrence-no">No</button>
+          </div>
+          <input type="hidden" id="recurrence" />
+        </div>
+      </div>
+      <div id="recurrence-warn" class="alert alert-danger" style="display:none; margin-top:12px">
+        <span class="alert-icon">🚨</span>
+        <span>Recurrence confirmed. D7 Prevention score will be capped at 1 regardless of entry. Prevention definitively failed if the defect returned.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: D-STEP SCORING -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>D-Step Scoring</h2>
+    </div>
+    <div class="section-body">
+      <div class="alert alert-warning" style="margin-bottom:16px">
+        <span class="alert-icon">ℹ</span>
+        <span>Score each discipline based on evidence quality — not template completion. Use the rubric below each step. Do not score from memory; read the 8D report while scoring.</span>
+      </div>
+
+      <!-- D1 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d1')">
+          <div class="d-step-meta">
+            <span class="d-tag">D1</span>
+            <span class="d-name">Team Formation</span>
+            <span class="weight-tag weight-1x">×1</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num score-0" id="d1-display">—</span>
+            <span style="font-size:11px; color:var(--gray-400)">▼</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d1-body">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d1',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d1',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d1',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d1',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — No team or owner identified.<br>
+            <strong>1</strong> — Owner named but missing key functions or unclear accountability.<br>
+            <strong>2</strong> — Appropriate owner and most functions engaged.<br>
+            <strong>3</strong> — Cross-functional team aligned to issue source, clear accountable owner, defined cadence. Evidence: team list, function map.
+          </div>
+          <div class="d-step-alert warn" id="d1-alert">⚠ Low score — verify owner accountability and cross-functional coverage before accepting.</div>
+        </div>
+        <input type="hidden" id="d1" value="" />
+      </div>
+
+      <!-- D2 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d2')">
+          <div class="d-step-meta">
+            <span class="d-tag">D2</span>
+            <span class="d-name">Problem Description</span>
+            <span class="weight-tag weight-1-5x">×1.5</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d2-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d2-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d2',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d2',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d2',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d2',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — Problem not defined.<br>
+            <strong>1</strong> — Narrative only; weak quantification or scope.<br>
+            <strong>2</strong> — Problem defined with basic data and scope.<br>
+            <strong>3</strong> — Clear, quantified, segmented IS/IS-NOT statement. What is and is not affected, with defect rate, location, timing, serial/batch scope.
+          </div>
+          <div class="d-step-alert warn" id="d2-alert">⚠ Weak problem definition — garbage in, garbage out on root cause. D4 score is unreliable without this.</div>
+        </div>
+        <input type="hidden" id="d2" value="" />
+      </div>
+
+      <!-- D3 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d3')">
+          <div class="d-step-meta">
+            <span class="d-tag">D3</span>
+            <span class="d-name">Interim Containment</span>
+            <span class="weight-tag weight-1x">×1</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d3-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d3-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d3',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d3',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d3',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d3',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — Containment absent.<br>
+            <strong>1</strong> — Containment launched but incomplete or not verified.<br>
+            <strong>2</strong> — Containment implemented with basic coverage.<br>
+            <strong>3</strong> — Fast, complete, traceable, and verified across WIP/FG/shipments. Evidence: stock checks, suspect inventory status, verification results.
+          </div>
+          <div class="d-step-alert warn" id="d3-alert">⚠ Containment weakness — check whether WIP, finished goods, and in-transit shipments were all covered and verified.</div>
+        </div>
+        <input type="hidden" id="d3" value="" />
+      </div>
+
+      <!-- D4a -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d4a')">
+          <div class="d-step-meta">
+            <span class="d-tag">D4a</span>
+            <span class="d-name">Occurrence Root Cause</span>
+            <span class="weight-tag weight-2x">×2</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d4a-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d4a-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d4a',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d4a',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d4a',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d4a',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>Why the defect was produced.</strong><br>
+            <strong>0</strong> — No root cause or unsupported guess.<br>
+            <strong>1</strong> — Likely cause stated but not validated; assumption only.<br>
+            <strong>2</strong> — Root cause supported with some evidence.<br>
+            <strong>3</strong> — Validated causal chain with evidence or trials — team demonstrated ability to turn the defect on and off. Evidence: 5 Why, fishbone, test data, process comparisons.
+          </div>
+          <div class="d-step-alert danger" id="d4a-alert">🚨 Critical gap — unvalidated root cause means the corrective action is guesswork. D5–D7 scores are unreliable.</div>
+        </div>
+        <input type="hidden" id="d4a" value="" />
+      </div>
+
+      <!-- D4b -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d4b')">
+          <div class="d-step-meta">
+            <span class="d-tag">D4b</span>
+            <span class="d-name">Escape Point</span>
+            <span class="weight-tag weight-2x">×2</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d4b-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d4b-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d4b',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d4b',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d4b',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d4b',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>Why the detection system failed to catch it.</strong><br>
+            <strong>0</strong> — Escape point not addressed.<br>
+            <strong>1</strong> — Escape mentioned but not analysed.<br>
+            <strong>2</strong> — Escape point identified with partial evidence.<br>
+            <strong>3</strong> — Verified escape point with evidence — explains exactly where and why the control failed. Evidence: control plan review, inspection records, detection gap analysis.
+          </div>
+          <div class="d-step-alert danger" id="d4b-alert">🚨 Escape point missing — even a correct occurrence root cause fix will not prevent future customer escapes without addressing the detection failure.</div>
+        </div>
+        <input type="hidden" id="d4b" value="" />
+      </div>
+
+      <!-- D5 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d5')">
+          <div class="d-step-meta">
+            <span class="d-tag">D5</span>
+            <span class="d-name">Action Selection</span>
+            <span class="weight-tag weight-1x">×1</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d5-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d5-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d5',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d5',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d5',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d5',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — No permanent actions defined.<br>
+            <strong>1</strong> — Actions generic or administrative; weak linkage to cause.<br>
+            <strong>2</strong> — Actions generally linked to cause.<br>
+            <strong>3</strong> — Actions clearly linked to both occurrence and escape causes, prioritised by risk and sustainability. Side effects verified. Evidence: action list, risk rationale, poka-yoke documentation.
+          </div>
+          <div class="d-step-alert warn" id="d5-alert">⚠ Verify that actions address both the occurrence root cause (D4a) and the escape point (D4b), not just one.</div>
+        </div>
+        <input type="hidden" id="d5" value="" />
+      </div>
+
+      <!-- D6 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d6')">
+          <div class="d-step-meta">
+            <span class="d-tag">D6</span>
+            <span class="d-name">Validation</span>
+            <span class="weight-tag weight-1-5x">×1.5</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d6-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d6-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d6',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d6',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d6',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d6',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — Not implemented or not validated.<br>
+            <strong>1</strong> — Implemented but late or without effectiveness evidence.<br>
+            <strong>2</strong> — Implemented and basic effectiveness shown.<br>
+            <strong>3</strong> — Implemented on time with objective before/after data confirming effectiveness and residual risk reviewed. Evidence: PPM trend, scrap trend, audit results, trial data.
+          </div>
+          <div class="d-step-alert warn" id="d6-alert">⚠ No data, no proof. A statement that the action was implemented is not validation — before/after evidence is required.</div>
+        </div>
+        <input type="hidden" id="d6" value="" />
+      </div>
+
+      <!-- D7 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d7')">
+          <div class="d-step-meta">
+            <span class="d-tag">D7</span>
+            <span class="d-name">Prevent Recurrence</span>
+            <span class="weight-tag weight-2x">×2</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d7-display">—</span>
+            <span id="d7-cap-badge" style="display:none; font-size:10px; background:var(--danger-light); color:var(--danger); border:1px solid #C0392B40; padding:2px 6px; border-radius:4px; font-weight:600;">CAPPED</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d7-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d7',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d7',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d7',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d7',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — No prevention update.<br>
+            <strong>1</strong> — Local fix only; standards not updated.<br>
+            <strong>2</strong> — Some system updates made.<br>
+            <strong>3</strong> — PFMEA, Control Plan, Work Instructions, training, and audit system updated AND deployed to similar processes or sites. Evidence: updated PFMEA, control plan, standard work, training records, layered audit records.
+          </div>
+          <div class="d-step-alert warn" id="d7-alert">⚠ D7 is where most organisations fail — they fix the one line and never deploy horizontally. Check for evidence of system-level updates, not just local fixes.</div>
+          <div class="d-step-alert danger show" id="d7-cap-alert" style="display:none">🚨 Recurrence confirmed — D7 is automatically capped at 1. Prevention failed by definition.</div>
+        </div>
+        <input type="hidden" id="d7" value="" />
+      </div>
+
+      <!-- D8 -->
+      <div class="d-step-block">
+        <div class="d-step-header" onclick="toggleRubric('d8')">
+          <div class="d-step-meta">
+            <span class="d-tag">D8</span>
+            <span class="d-name">Closure Discipline</span>
+            <span class="weight-tag weight-1x">×1</span>
+          </div>
+          <div class="score-display">
+            <span class="score-num" id="d8-display">—</span>
+          </div>
+        </div>
+        <div class="d-step-body" id="d8-body" style="display:none">
+          <div class="score-buttons">
+            <button class="score-btn" onclick="setScore('d8',0,this)"><span class="score-val" style="color:var(--danger)">0</span><span class="score-label">Missing</span></button>
+            <button class="score-btn" onclick="setScore('d8',1,this)"><span class="score-val" style="color:#E67E22">1</span><span class="score-label">Weak</span></button>
+            <button class="score-btn" onclick="setScore('d8',2,this)"><span class="score-val" style="color:#2980B9">2</span><span class="score-label">Adequate</span></button>
+            <button class="score-btn" onclick="setScore('d8',3,this)"><span class="score-val" style="color:var(--success)">3</span><span class="score-label">Strong</span></button>
+          </div>
+          <div class="rubric-box">
+            <strong>0</strong> — Case not formally closed.<br>
+            <strong>1</strong> — Closure incomplete or poorly documented.<br>
+            <strong>2</strong> — Closure complete with basic lessons learned.<br>
+            <strong>3</strong> — Closure disciplined; lessons captured and shared; customer accepted where required. Evidence: closure approval, VOC closure confirmation, lessons learned record.
+          </div>
+          <div class="d-step-alert warn" id="d8-alert">⚠ Incomplete closure means lessons learned are not captured and the case is not formally resolved from a customer perspective.</div>
+        </div>
+        <input type="hidden" id="d8" value="" />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 5: REVIEWER ASSESSMENT -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Reviewer Assessment</h2>
+    </div>
+    <div class="section-body">
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="field">
+          <label>Evidence Strength <span class="req">*</span></label>
+          <select id="evidence-strength">
+            <option value="">— Select —</option>
+            <option>Weak</option>
+            <option>Moderate</option>
+            <option>Strong</option>
+          </select>
+          <span class="helper">Overall quality of evidence supporting the 8D conclusions.</span>
+        </div>
+        <div class="field">
+          <label>Primary Gap Category <span class="req">*</span></label>
+          <select id="gap-category">
+            <option value="">— Select —</option>
+            <option>Problem definition</option>
+            <option>Containment discipline</option>
+            <option>Root cause rigor</option>
+            <option>Escape point missing</option>
+            <option>Action selection</option>
+            <option>Validation of effectiveness</option>
+            <option>Prevent recurrence</option>
+            <option>Governance / ownership</option>
+            <option>External communication</option>
+          </select>
+          <span class="helper">Single biggest weakness driving the low score.</span>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px">
+        <label>VOC Linkage</label>
+        <input type="text" id="voc-link" placeholder="Customer complaint ref, warranty claim, or audit finding this 8D closes" />
+        <span class="helper">Optional — maps this case to a customer-facing event.</span>
+      </div>
+      <div class="field">
+        <label>Reviewer Notes</label>
+        <textarea id="reviewer-notes" placeholder="Flag anything significant — unusual circumstances, partial evidence, items for follow-up, or reasons for scoring decisions that are not obvious from the rubric."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="submit-bar">
+  <span class="error-summary" id="error-summary"></span>
+  <button class="btn-submit" onclick="submitForm()">
+    Submit Review <span class="arrow">→</span>
+  </button>
+</div>
+
+<script>
+// ── CONFIGURATION — set by IT during handoff ─────────────────────────────────
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwgd9OK83ZptJjL1bqQEYirUm1Z12AUNetMNAk_DUfBzGDeybBgavZJekmDBXiOant5/exec";   // Google Apps Script web app URL
+const VALID_KEY   = "LUXTJ8D";          // Organisation access code
+// ─────────────────────────────────────────────────────────────────────────────
+const WEIGHTS = { d1:1, d2:1.5, d3:1, d4a:2, d4b:2, d5:1, d6:1.5, d7:2, d8:1 };
+const MAX_SCORE = Object.values(WEIGHTS).reduce((s,w)=>s+w*3,0);
+const scores = { d1:'', d2:'', d3:'', d4a:'', d4b:'', d5:'', d6:'', d7:'', d8:'' };
+
+function setScore(step, val, btn) {
+  const isRecur = document.getElementById('recurrence').value === 'Yes';
+  let actual = val;
+  if (step === 'd7' && isRecur && val > 1) {
+    actual = 1;
+    showD7Cap(true);
+  }
+  scores[step] = actual;
+  document.getElementById(step).value = actual;
+  const disp = document.getElementById(step+'-display');
+  disp.textContent = actual;
+  disp.className = 'score-num score-'+actual;
+  btn.closest('.score-buttons').querySelectorAll('.score-btn').forEach(b=>b.className='score-btn');
+  btn.className = 'score-btn selected-'+actual;
+  const alert = document.getElementById(step+'-alert');
+  if (alert) {
+    if (actual <= 1) { alert.classList.add('show'); }
+    else { alert.classList.remove('show'); }
+  }
+  updateLive();
+}
+
+function showD7Cap(show) {
+  document.getElementById('d7-cap-badge').style.display = show ? 'inline-flex' : 'none';
+  const alert = document.getElementById('d7-cap-alert');
+  if (alert) alert.style.display = show ? 'flex' : 'none';
+}
+
+function setToggle(id, val, btn) {
+  document.getElementById(id).value = val;
+  const group = btn.closest('.toggle-group');
+  group.querySelectorAll('.toggle-btn').forEach(b=>{
+    b.classList.remove('active-yes','active-no');
+  });
+  btn.classList.add(val==='Yes'?'active-yes':'active-no');
+  if (id === 'recurrence') {
+    const warn = document.getElementById('recurrence-warn');
+    warn.style.display = val==='Yes' ? 'flex' : 'none';
+    if (val==='Yes' && scores.d7!=='' && scores.d7>1) {
+      scores.d7 = 1;
+      document.getElementById('d7').value = 1;
+      document.getElementById('d7-display').textContent = 1;
+      document.getElementById('d7-display').className = 'score-num score-1';
+      showD7Cap(true);
+    } else if (val==='No') {
+      showD7Cap(false);
+    }
+    updateLive();
+  }
+}
+
+function toggleRubric(step) {
+  const body = document.getElementById(step+'-body');
+  body.style.display = body.style.display==='none' ? 'block' : 'none';
+}
+
+function updateLive() {
+  let weighted = 0; let filled = 0;
+  for (const [s,w] of Object.entries(WEIGHTS)) {
+    if (scores[s]!=='') { weighted += scores[s]*w; filled++; }
+  }
+  if (filled === 0) { document.getElementById('live-pct').textContent='—'; document.getElementById('live-band').style.display='none'; return; }
+  const pct = weighted / MAX_SCORE;
+  document.getElementById('live-pct').textContent = Math.round(pct*100)+'%';
+  const bandEl = document.getElementById('live-band');
+  bandEl.style.display = 'inline-flex';
+  if (pct >= 0.8) { bandEl.textContent='Healthy'; bandEl.className='band band-healthy'; }
+  else if (pct >= 0.6) { bandEl.textContent='Unstable'; bandEl.className='band band-unstable'; }
+  else { bandEl.textContent='High Risk'; bandEl.className='band band-highrisk'; }
+}
+
+function calcDays() {
+  const open=document.getElementById('date-open').value;
+  const cont=document.getElementById('date-contain').value;
+  const rc=document.getElementById('date-rc').value;
+  const pca=document.getElementById('date-pca').value;
+  const close=document.getElementById('date-close').value;
+  const summary = document.getElementById('days-summary');
+  const warnEl = document.getElementById('containment-warn');
+  summary.innerHTML='';
+  function daysBetween(a,b){ if(!a||!b) return null; return Math.round((new Date(b)-new Date(a))/(86400000)); }
+  const dCont = daysBetween(open,cont);
+  const dRC = daysBetween(open,rc);
+  const dPCA = daysBetween(open,pca);
+  const dClose = daysBetween(open,close);
+  function badge(label,days,warnThresh){
+    if(days===null) return;
+    const cls = days>warnThresh ? 'warn' : 'ok';
+    summary.innerHTML+=`<span class="days-badge ${cls}">${label}: <strong>${days}d</strong></span>`;
+  }
+  const sev = document.getElementById('severity').value;
+  const contThresh = (sev==='Critical')?1:(sev==='High')?2:3;
+  badge('Days to Containment',dCont,contThresh);
+  badge('Days to Root Cause',dRC,14);
+  badge('Days to PCA',dPCA,21);
+  badge('Days to Closure',dClose,30);
+  if(dCont!==null && dCont>contThresh && (sev==='Critical'||sev==='High')){
+    warnEl.style.display='flex';
+    document.getElementById('containment-warn-text').textContent=
+      `${sev} severity issue contained in ${dCont} days — threshold is ${contThresh} day(s). This should suppress the D3 score. Verify that stock, WIP, and shipments were all covered during the delay.`;
+  } else { warnEl.style.display='none'; }
+}
+
+function checkSeverityWarning(){ calcDays(); }
+
+function validate(){
+  const required=[
+    ['review-id','Review ID'],['case-id','Case ID'],['issue-title','Issue Title'],
+    ['problem-type','Problem Type'],['severity','Severity'],['customer','Customer / Program'],
+    ['site','Site / Area'],['owner-fn','Owner Function'],['reviewer','Reviewer Name'],
+    ['date-open','Open Date'],['date-contain','Containment Date'],['date-close','Closed Date'],
+    ['rc-confirm','Root Cause Confirmed'],['pca-impl','Permanent CA Implemented'],
+    ['recurrence','Recurrence'],['evidence-strength','Evidence Strength'],
+    ['gap-category','Primary Gap Category'],['access-code','Access Code']
+  ];
+  const scoreFields=['d1','d2','d3','d4a','d4b','d5','d6','d7','d8'];
+  let errors=[];
+  required.forEach(([id,label])=>{
+    const el=document.getElementById(id);
+    if(!el.value||el.value===''){
+      errors.push(label);
+      el.classList.add('error');
+    } else { el.classList.remove('error'); }
+  });
+  scoreFields.forEach(s=>{
+    if(scores[s]==='') errors.push(s.toUpperCase()+' score');
+  });
+  return errors;
+}
+
+function getHealthBand(pct){
+  if(pct>=0.8) return 'Healthy';
+  if(pct>=0.6) return 'Unstable / inconsistent';
+  return 'High risk / weak discipline';
+}
+
+function submitForm(){
+  const errors=validate();
+  const errEl=document.getElementById('error-summary');
+  if(errors.length>0){
+    errEl.textContent='Missing: '+errors.slice(0,4).join(', ')+(errors.length>4?` + ${errors.length-4} more`:'');
+    return;
+  }
+  errEl.textContent='';
+  let weighted=0;
+  for(const [s,w] of Object.entries(WEIGHTS)){ weighted+=scores[s]*w; }
+  const pct=weighted/MAX_SCORE;
+  const band=getHealthBand(pct);
+  function d(id){ return document.getElementById(id).value; }
+  function days(a,b){ if(!d(a)||!d(b)) return ''; return Math.round((new Date(d(b))-new Date(d(a)))/86400000); }
+  const totalScore=[d('d1'),d('d2'),d('d3'),d('d4a'),d('d4b'),d('d5'),d('d6'),d('d7'),d('d8')]
+    .filter(v=>v!=='').reduce((s,v)=>s+Number(v),0);
+  const row=[
+    d('review-id'), d('case-id'), d('issue-title'), d('problem-type'),
+    d('customer'), d('site'), d('date-open'), d('date-contain'),
+    d('rc-confirm'), d('pca-impl'), d('date-close'), d('severity'),
+    d('owner-fn'), 'Closed', d('recurrence'),
+    d('gap-category'), d('evidence-strength'), d('reviewer'),
+    d('d1'), d('d2'), d('d3'), d('d4a'), d('d4b'),
+    d('d5'), d('d6'), d('d7'), d('d8'),
+    totalScore, (pct*100).toFixed(1)+'%', band,
+    days('date-open','date-contain'), days('date-open','date-rc'),
+    days('date-open','date-pca'), days('date-open','date-close'),
+    d('voc-link'), d('reviewer-notes').replace(/\n/g,' ')
+  ];
+  const headers=[
+    'Review ID','Case ID','Issue Title','Problem Type','Customer / Program','Site / Area',
+    'Open Date','Containment Date','Root Cause Confirmed','Permanent CA Implemented','Closed Date',
+    'Severity','Owner Function','Status','Recurrence (30/60/90)','Primary Gap Category',
+    'Evidence Strength','Reviewer Name',
+    'D1 Team','D2 Problem','D3 Containment','D4a Root Cause','D4b Escape Point',
+    'D5 Action Selection','D6 Validation','D7 Prevention','D8 Closure',
+    'Total Score','Health %','Health Band',
+    'Days to Containment','Days to RC','Days to PCA','Days to Closure',
+    'VOC Linkage','Reviewer Notes'
+  ];
+  // Access code check (client-side gate)
+  if (d('access-code') !== VALID_KEY) {
+    errEl.textContent = 'Invalid access code — submission blocked.';
+    document.getElementById('access-code').classList.add('error');
+    return;
+  }
+  document.getElementById('access-code').classList.remove('error');
+
+  // Build keyed payload for the Sheet
+  const payload = { accessCode: d('access-code') };
+  headers.forEach((h,i) => payload[h] = row[i]);
+
+  const btn = document.querySelector('.btn-submit');
+  const originalLabel = btn.innerHTML;
+  btn.innerHTML = 'Submitting…';
+  btn.style.pointerEvents = 'none';
+
+  // If the web app URL is not yet configured, fall back to CSV download
+  if (WEB_APP_URL.indexOf('PASTE_WEB_APP_URL') === 0) {
+    const csv=[headers,row].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=d('review-id')+'_8D_Review.csv';
+    a.click(); URL.revokeObjectURL(url);
+    btn.innerHTML = originalLabel; btn.style.pointerEvents = 'auto';
+    document.getElementById('success-banner').textContent = '✓ Web app not connected yet — CSV downloaded as fallback. Append it to your master sheet.';
+    document.getElementById('success-banner').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
+
+  // POST to Google Apps Script web app
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    btn.innerHTML = originalLabel; btn.style.pointerEvents = 'auto';
+    document.getElementById('success-banner').textContent = '✓ Review submitted to the live dashboard.';
+    document.getElementById('success-banner').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  })
+  .catch(() => {
+    btn.innerHTML = originalLabel; btn.style.pointerEvents = 'auto';
+    errEl.textContent = 'Submission failed — check internet connection and try again.';
+  });
+}
+
+document.querySelectorAll('.d-step-body').forEach((b,i)=>{ if(i>0) b.style.display='none'; });
+</script>
+</body>
+</html>
