@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>8D Quality Dashboard — DEMO — SmartValueFlow</title>
+<title>8D Quality Intelligence Dashboard — SmartValueFlow</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
@@ -101,11 +101,6 @@ tbody td{padding:10px 12px;white-space:nowrap}
 .note-box{background:var(--white);border:1px solid var(--gray-200);border-left:3px solid var(--amber);border-radius:var(--radius);padding:12px 16px;margin-top:2px}
 .note-label{display:block;font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:5px}
 .note-text{font-size:13px;color:var(--gray-800);line-height:1.6;white-space:pre-wrap}
-.stage-pill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
-.stage-closed{background:#E8F5E9;color:#1B5E20}
-.stage-open{background:#FFF3DC;color:#7A5C00}
-.inprogress-row td{background:#FFFCF5}
-.inprogress-row{border-left:3px solid var(--amber)}
 
 /* INTERPRETATION PANEL */
 .interp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -157,14 +152,9 @@ tbody td{padding:10px 12px;white-space:nowrap}
     <button class="filter-btn" onclick="applyFilter('band','Healthy',this)">Healthy</button>
     <button class="filter-btn" onclick="applyFilter('band','Unstable',this)">Unstable</button>
     <button class="filter-btn" onclick="applyFilter('band','High risk',this)">High Risk</button>
-    &nbsp;
-    <span class="filter-label">Stage</span>
-    <button class="filter-btn active" onclick="applyFilter('stage','All',this)">All</button>
-    <button class="filter-btn" onclick="applyFilter('stage','Closed',this)">Closed</button>
-    <button class="filter-btn" onclick="applyFilter('stage','In Progress',this)">In Progress</button>
   </div>
   <div class="topbar-right">
-    <div class="last-updated" id="last-updated">Demo · 10 sample cases</div>
+    <div class="last-updated" id="last-updated">Loading…</div>
     <label class="load-btn">
       ↑ Load CSV
       <input type="file" accept=".csv" id="csv-input" style="display:none" onchange="loadCSV(this)" />
@@ -172,7 +162,6 @@ tbody td{padding:10px 12px;white-space:nowrap}
   </div>
 </div>
 
-<div style="background:#FFF3DC;border-bottom:1px solid #E8A020;padding:10px 1.5rem;text-align:center;font-size:13px;color:#7A5C00;font-weight:600">📋 DEMO VIEW - 6 closed and 4 in-progress 8Ds. Use the Stage filter (top right) to compare. The live dashboard starts empty and fills from real submissions.</div>
 <div class="page">
 
 <!-- KPI CARDS -->
@@ -323,7 +312,6 @@ tbody td{padding:10px 12px;white-space:nowrap}
           <th style="text-align:center">D8</th>
           <th onclick="sortTable('health')" style="cursor:pointer;text-align:center">Health % ↕</th>
           <th>Band</th>
-          <th>Stage</th>
           <th style="text-align:center">Days Contain</th>
           <th>Gap Category</th>
           <th>Recurrence</th>
@@ -343,9 +331,9 @@ tbody td{padding:10px 12px;white-space:nowrap}
 
 <script>
 // ── MASTER DATA (from Excel 8D_Review_Data) ──────────────────────────────────
-let ALL_DATA = [{"id": "R-001", "title": "Connector intermittent open circuit", "type": "Design", "sev": "High", "d1": 3, "d2": 2, "d3": 3, "d4": 3, "d4b": 3, "d5": 2, "d6": 2, "d7": 3, "d8": 2, "health": 0.872, "band": "Healthy", "dCont": 1, "dRC": 13, "dPCA": 23, "dClose": 31, "gap": "Root cause rigor", "recur": "No", "evid": "Moderate", "notes": "Strong root cause; escape point documented via AOI review.", "statusRaw": "Closed", "isOpen": false, "reached": ""}, {"id": "R-002", "title": "Housing cosmetic scratch at unpack", "type": "Manufacturing", "sev": "Medium", "d1": 2, "d2": 2, "d3": 2, "d4": 2, "d4b": 2, "d5": 2, "d6": 2, "d7": 1, "d8": 2, "health": 0.615, "band": "Unstable", "dCont": 0, "dRC": 8, "dPCA": 13, "dClose": 18, "gap": "Containment discipline", "recur": "No", "evid": "Strong", "notes": "Prevention update never deployed to sister line.", "statusRaw": "Closed", "isOpen": false, "reached": ""}, {"id": "R-003", "title": "Supplier PCB solder void escape", "type": "Supplier", "sev": "Critical", "d1": 2, "d2": 2, "d3": 1, "d4": 1, "d4b": 1, "d5": 2, "d6": 1, "d7": 1, "d8": 2, "health": 0.449, "band": "High risk", "dCont": 3, "dRC": 17, "dPCA": 23, "dClose": 31, "gap": "External communication", "recur": "Yes", "evid": "Moderate", "notes": "Recurrence confirmed - D7 auto-capped. Escape point not analysed.", "statusRaw": "Closed", "isOpen": false, "reached": ""}, {"id": "R-004", "title": "Torque station out-of-spec drift", "type": "Manufacturing", "sev": "High", "d1": 2, "d2": 2, "d3": 3, "d4": 2, "d4b": 2, "d5": 2, "d6": 2, "d7": 3, "d8": 2, "health": 0.744, "band": "Unstable", "dCont": 0, "dRC": 3, "dPCA": 8, "dClose": 15, "gap": "Validation of effectiveness", "recur": "No", "evid": "Strong", "notes": "Good poka-yoke; drop-sensor added to all stations.", "statusRaw": "Closed", "isOpen": false, "reached": ""}, {"id": "R-005", "title": "Supplier foam density variation", "type": "Supplier", "sev": "High", "d1": 2, "d2": 2, "d3": 2, "d4": 2, "d4b": 1, "d5": 2, "d6": 1, "d7": 1, "d8": 2, "health": 0.526, "band": "High risk", "dCont": 2, "dRC": 15, "dPCA": 23, "dClose": 33, "gap": "Prevent recurrence", "recur": "Yes", "evid": "Moderate", "notes": "Escape point weak; foam spec control not updated.", "statusRaw": "Closed", "isOpen": false, "reached": ""}, {"id": "R-006", "title": "Adhesive misapplication on seal", "type": "Design", "sev": "Medium", "d1": 3, "d2": 3, "d3": 2, "d4": 3, "d4b": 2, "d5": 2, "d6": 3, "d7": 2, "d8": 2, "health": 0.821, "band": "Healthy", "dCont": 1, "dRC": 5, "dPCA": 12, "dClose": 20, "gap": "Action selection", "recur": "No", "evid": "Strong", "notes": "Clean closure; lessons shared at quality review.", "statusRaw": "Closed", "isOpen": false, "reached": ""}, {"id": "R-007", "title": "Mic boot seating failure", "type": "Design", "sev": "High", "d1": 3, "d2": 3, "d3": 2, "d4": 3, "d4b": 2, "d5": 2, "d6": 0, "d7": 0, "d8": 0, "health": 0.843, "band": "Healthy", "dCont": 1, "dRC": 12, "dPCA": "", "dClose": "", "gap": "Root cause rigor", "recur": "No", "evid": "Moderate", "notes": "Pre-submission check - strong through D5, validation pending.", "statusRaw": "In Progress - D5", "isOpen": true, "reached": "D5"}, {"id": "R-008", "title": "Cable strain relief crack", "type": "Manufacturing", "sev": "High", "d1": 2, "d2": 2, "d3": 3, "d4": 2, "d4b": 2, "d5": 2, "d6": 2, "d7": 0, "d8": 0, "health": 0.7, "band": "Unstable", "dCont": 0, "dRC": 4, "dPCA": 9, "dClose": "", "gap": "Validation of effectiveness", "recur": "No", "evid": "Strong", "notes": "Validation underway; awaiting before/after data.", "statusRaw": "In Progress - D6", "isOpen": true, "reached": "D6"}, {"id": "R-009", "title": "Supplier connector plating defect", "type": "Supplier", "sev": "Critical", "d1": 2, "d2": 2, "d3": 1, "d4": 2, "d4b": 1, "d5": 0, "d6": 0, "d7": 0, "d8": 0, "health": 0.533, "band": "High risk", "dCont": 3, "dRC": 16, "dPCA": "", "dClose": "", "gap": "Escape point missing", "recur": "No", "evid": "Weak", "notes": "Early-stage check - escape point still unaddressed.", "statusRaw": "In Progress - D4", "isOpen": true, "reached": "D4"}, {"id": "R-010", "title": "Speaker grille misalignment", "type": "Design", "sev": "High", "d1": 3, "d2": 2, "d3": 3, "d4": 3, "d4b": 3, "d5": 2, "d6": 3, "d7": 2, "d8": 0, "health": 0.875, "band": "Healthy", "dCont": 1, "dRC": 10, "dPCA": 18, "dClose": "", "gap": "Prevent recurrence", "recur": "No", "evid": "Strong", "notes": "Nearly complete - deploying prevention before closure.", "statusRaw": "In Progress - D7", "isOpen": true, "reached": "D7"}];
+let ALL_DATA = [];  // starts empty — fills from live Google Sheet data
 
-let filters = {type:'All', band:'All', stage:'All'};
+let filters = {type:'All', band:'All'};
 let sortKey = 'id'; let sortAsc = true;
 let charts = {};
 
@@ -357,13 +345,10 @@ function getFiltered() {
       (filters.band === 'Healthy' && d.band === 'Healthy') ||
       (filters.band === 'Unstable' && d.band === 'Unstable') ||
       (filters.band === 'High risk' && d.band === 'High risk');
-    const stageOk = filters.stage === 'All' ||
-      (filters.stage === 'Closed' && !d.isOpen) ||
-      (filters.stage === 'In Progress' && d.isOpen);
     const search = document.getElementById('search-box')?.value?.toLowerCase() || '';
     const searchOk = !search || d.title.toLowerCase().includes(search) ||
       d.id.toLowerCase().includes(search) || d.gap.toLowerCase().includes(search);
-    return typeOk && bandOk && stageOk && searchOk;
+    return typeOk && bandOk && searchOk;
   });
 }
 
@@ -384,13 +369,13 @@ function applyFilter(key, val, btn) {
     if (b.textContent.trim() === val || (val === 'All' && b.textContent.trim() === 'All' && b.onclick.toString().includes(`'${key}'`))) {}
   });
   // just toggle within group
-  // Deactivate only the buttons in the SAME group (siblings between group labels)
-  const sibs = Array.from(btn.parentElement.querySelectorAll('.filter-btn'));
-  // Identify group by the onclick key
+  const groupStart = ['All','Design','Manufacturing','Supplier'];
+  const bandGroup = ['All','Healthy','Unstable','High Risk'];
+  const btnText = btn.textContent.trim();
   btn.closest('.topbar-filters').querySelectorAll('.filter-btn').forEach(b => {
-    if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'"+key+"'") !== -1) {
-      b.classList.remove('active');
-    }
+    const t = b.textContent.trim();
+    if (key === 'type' && groupStart.includes(t)) b.classList.remove('active');
+    if (key === 'band' && (bandGroup.includes(t) || t === 'High Risk')) b.classList.remove('active');
   });
   btn.classList.add('active');
   updateAll();
@@ -410,27 +395,24 @@ function ragColorAlpha(score, a) {
 
 // ── KPI CARDS ─────────────────────────────────────────────────────────────────
 function renderKPI(data) {
-  const closed = data.filter(d=>!d.isOpen);
-  const inProg = data.filter(d=>d.isOpen);
-  const n = closed.length;
-  const avgH = n ? closed.reduce((s,d)=>s+d.health,0)/n : 0;
-  const healthy = closed.filter(d=>d.band==='Healthy').length;
-  const highRisk = closed.filter(d=>d.band==='High risk').length;
-  const recur = closed.filter(d=>d.recur==='Yes').length;
-  const priority = closed.filter(d=>d.sev==='Critical'||d.sev==='High').length;
-  const inProgCount = inProg.length;
+  const n = data.length;
+  const avgH = n ? data.reduce((s,d)=>s+d.health,0)/n : 0;
+  const healthy = data.filter(d=>d.band==='Healthy').length;
+  const highRisk = data.filter(d=>d.band==='High risk').length;
+  const recur = data.filter(d=>d.recur==='Yes').length;
+  const priority = data.filter(d=>d.sev==='Critical'||d.sev==='High').length;
   const band = avgH>=0.8?'Healthy':avgH>=0.6?'Unstable':'High risk';
   const bandClass = band==='Healthy'?'badge-healthy':band==='Unstable'?'badge-unstable':'badge-highrisk';
   document.getElementById('kpi-grid').innerHTML = `
     <div class="kpi-card" style="--accent:#1A2B4A">
-      <div class="kpi-label">Closed Cases</div>
+      <div class="kpi-label">Total Cases</div>
       <div class="kpi-value">${n}</div>
-      <div class="kpi-sub">${inProgCount>0?inProgCount+' in progress (excluded from scores)':'Scored 8Ds'}</div>
+      <div class="kpi-sub">Live reviewed 8Ds</div>
     </div>
     <div class="kpi-card" style="--accent:${avgH>=0.8?'#2E7D32':avgH>=0.6?'#E8A020':'#C0392B'}">
       <div class="kpi-label">Avg Weighted Health</div>
-      <div class="kpi-value" style="color:${avgH>=0.8?'#2E7D32':avgH>=0.6?'#7A5C00':'#C0392B'}">${n?Math.round(avgH*100)+'%':'—'}</div>
-      <div class="kpi-sub">${n?`<span class="kpi-badge ${bandClass}">${band}</span> closed only`:'No closed cases'}</div>
+      <div class="kpi-value" style="color:${avgH>=0.8?'#2E7D32':avgH>=0.6?'#7A5C00':'#C0392B'}">${Math.round(avgH*100)}%</div>
+      <div class="kpi-sub"><span class="kpi-badge ${bandClass}">${band}</span></div>
     </div>
     <div class="kpi-card" style="--accent:#2E7D32">
       <div class="kpi-label">Healthy Cases</div>
@@ -674,27 +656,20 @@ function renderTable() {
   const sevClass = s=>s==='Critical'?'sev-critical':s==='High'?'sev-high':s==='Medium'?'sev-medium':'sev-low';
   const bandClass = b=>b==='Healthy'?'health-h':b==='Unstable'?'health-u':'health-r';
   document.getElementById('table-body').innerHTML = sorted.map(d=>`
-    <tr class="${d.isOpen?'inprogress-row':''}">
+    <tr>
       <td style="font-weight:700;color:var(--navy)">${d.id}</td>
       <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${d.title}">${d.title}</td>
       <td>${d.type}</td>
       <td><span class="severity-pill ${sevClass(d.sev)}">${d.sev}</span></td>
-      ${['d1','d2','d3','d4','d5','d6','d7','d8'].map((k,idx)=>{
-        const stepNum = idx+1;
-        const reachedNum = d.reached ? parseInt(d.reached.replace('D',''),10) : 8;
-        const inScope = !d.isOpen || stepNum <= reachedNum;
-        if (!inScope) return `<td class="score-cell" style="color:var(--gray-200)" title="Not yet completed">·</td>`;
-        return `<td class="score-cell" style="${scoreColor(d[k])}">${d[k]}</td>`;
-      }).join('')}
-      <td style="text-align:center;font-weight:700;color:${d.health>=0.8?'#2E7D32':d.health>=0.6?'#7A5C00':'#C0392B'}">${Math.round(d.health*100)}%${d.isOpen?'<span style="font-size:9px;color:var(--gray-400)"> partial</span>':''}</td>
+      ${['d1','d2','d3','d4','d5','d6','d7','d8'].map(k=>`<td class="score-cell" style="${scoreColor(d[k])}">${d[k]}</td>`).join('')}
+      <td style="text-align:center;font-weight:700;color:${d.health>=0.8?'#2E7D32':d.health>=0.6?'#7A5C00':'#C0392B'}">${Math.round(d.health*100)}%</td>
       <td><span class="health-pill ${bandClass(d.band)}">${d.band==='High risk'?'High Risk':d.band}</span></td>
-      <td>${d.isOpen ? `<span class="stage-pill stage-open">⏳ In Progress · ${d.reached||'—'}</span>` : `<span class="stage-pill stage-closed">✓ Closed</span>`}</td>
       <td style="text-align:center;color:${d.dCont>2?'#C0392B':'#2E7D32'};font-weight:600">${d.dCont}d</td>
       <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--gray-600)">${d.gap}</td>
       <td style="text-align:center;color:${d.recur==='Yes'?'#C0392B':'#2E7D32'};font-weight:700">${d.recur}</td>
       <td style="text-align:center">${d.notes && d.notes.trim() ? `<button class="notes-btn" onclick="toggleNote('${d.id}')" title="View reviewer notes">💬</button>` : `<span style="color:var(--gray-200)">—</span>`}</td>
     </tr>
-    ${d.notes && d.notes.trim() ? `<tr class="note-row" id="note-${d.id}" style="display:none"><td colspan="19"><div class="note-box"><span class="note-label">Reviewer Notes — ${d.id}</span><span class="note-text">${escapeHtml(d.notes)}</span></div></td></tr>` : ''}`).join('');
+    ${d.notes && d.notes.trim() ? `<tr class="note-row" id="note-${d.id}" style="display:none"><td colspan="18"><div class="note-box"><span class="note-label">Reviewer Notes — ${d.id}</span><span class="note-text">${escapeHtml(d.notes)}</span></div></td></tr>` : ''}`).join('');
   document.getElementById('table-subtitle').textContent = `${data.length} case${data.length!==1?'s':''} shown · click column header to sort`;
 }
 
@@ -731,10 +706,7 @@ function parseCSV(text) {
       dCont:+r['Days to Containment']||0, dRC:+r['Days to RC']||0,
       dPCA:+r['Days to PCA']||0, dClose:+r['Days to Closure']||0,
       gap:r['Primary Gap Category']||'', recur:r['Recurrence (30/60/90)']||'No',
-      evid:r['Evidence Strength']||'', notes:r['Reviewer Notes']||'',
-      statusRaw:(r['Status']||'Closed'),
-      isOpen:((r['Status']||'').indexOf('In Progress')===0),
-      reached:(((r['Status']||'').match(/D\d/)||[''])[0])
+      evid:r['Evidence Strength']||'', notes:r['Reviewer Notes']||''
     };
   });
 }
@@ -795,7 +767,9 @@ function updateAll() {
   renderTable();
 }
 
-updateAll();  // DEMO - static sample data, live fetch disabled
+updateAll();        // initial render with sample data
+fetchLiveData();    // then pull live data from the Sheet
+setInterval(fetchLiveData, 300000);  // refresh every 5 min
 </script>
 </body>
 </html>
